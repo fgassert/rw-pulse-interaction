@@ -13,7 +13,6 @@ RW_API = 'https://api.resourcewatch.org/v1'
 QUERY_URL = RW_API + "/query/{dataset_id}?sql={sql}"
 LAYER_URL = RW_API + "/dataset/{dataset_id}/layer/{layer_id}"
 LAYER_IDS = [
-    '7cacfb72-94ad-4137-b6a8-f5bdcbe0f4cc',
     'f4897107-5ae5-4685-8eee-cd1a5745a384',
     '275dcc83-673b-44e4-b7db-253ff1d2d867',
     '9bcaa1e8-3181-441f-879a-060b068b7c2a',
