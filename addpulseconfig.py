@@ -10,6 +10,8 @@ logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 ### Constants
 RW_API = 'https://api.resourcewatch.org/v1'
+QUERY_URL = RW_API + "/query/{dataset_id}?sql={sql}"
+LAYER_URL = RW_API + "/dataset/{dataset_id}/layer/{layer_id}"
 LAYER_IDS = [
     '7cacfb72-94ad-4137-b6a8-f5bdcbe0f4cc',
     'f4897107-5ae5-4685-8eee-cd1a5745a384',
@@ -28,10 +30,10 @@ LAYER_IDS = [
     '5ca12eec-f8fe-49eb-b353-67c9eeb5bc6a',
     '61067a0d-b2a3-441e-85c1-2eef5a18e4a5',
     'd63fff22-8cda-467e-b4ef-df3ab2613505',
-    '667ae321-649e-4caa-b761-35e370c776b0',
+    'a64f5142-e8ae-433f-afda-6628fc3255bf'
 ]
 API_KEY = os.environ['RW_API_KEY']
-
+INTERSECTS_SQL = "st_intersects(the_geom,st_buffer(ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Point\",\"coordinates\":{{point}}}'),4326),1))"
 
 def getLayer(layer_id):
     url = "{api_url}/layer/{layer_id}".format(
@@ -43,7 +45,6 @@ def getLayer(layer_id):
     else:
         return response.json()['data']
 
-    
 def main():
     logging.info('BEGIN')
 
@@ -53,30 +54,27 @@ def main():
         dataset_id = layer['attributes']['dataset']
         if layer['attributes']['provider'] == 'cartodb':
             config_sql = layer['attributes']['layerConfig']['body']['layers'][0]['options']['sql']
-            intersects_sql = "st_intersects(the_geom,st_buffer(ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Point\",\"coordinates\":{{point}}}'),4326),1))"
             where_pos = config_sql.lower().find('where')
             if where_pos >= 0:
                 sql = '{} {} AND{}'.format(
                     config_sql[:where_pos+5],
-                    intersects_sql,
+                    INTERSECTS_SQL,
                     config_sql[where_pos+5:]
                 )
             else:
-                sql = '{} WHERE {}'.format(config_sql, intersects_sql)
+                sql = '{} WHERE {}'.format(config_sql, INTERSECTS_SQL)
 
-            pulseConfig_url = "{api_url}/query/{dataset_id}?sql={sql}".format(
-                api_url=RW_API, dataset_id=dataset_id, sql=sql)
             interaction = layer['attributes']['interactionConfig']
             interaction["pulseConfig"] = {
-                "url": pulseConfig_url
+                "url": QUERY_URL.format(dataset_id=dataset_id, sql=sql)
             }
             payload = {
                 'application': ['rw'],
                 'interactionConfig': interaction
             }
-            post_url = "{api_url}/dataset/{dataset_id}/layer/{layer_id}".format(
-                api_url=RW_API, dataset_id=dataset_id, layer_id=layer_id)
+            post_url = LAYER_URL.format(dataset_id=dataset_id, layer_id=layer_id)
             post(post_url, payload)
+            logging.info('Updated {}'.format(layer_id))
         else:
             logging.info('Not carto')
 
