@@ -27,7 +27,12 @@ LAYER_IDS = [
     '5ca12eec-f8fe-49eb-b353-67c9eeb5bc6a',
     '61067a0d-b2a3-441e-85c1-2eef5a18e4a5',
     'd63fff22-8cda-467e-b4ef-df3ab2613505',
-    'a64f5142-e8ae-433f-afda-6628fc3255bf'
+    'a64f5142-e8ae-433f-afda-6628fc3255bf',
+    '99f02e72-c59d-4d3d-880f-922bff7b7f39', #NO2
+    '509c71b2-9c68-4acd-88a6-f64015494001', #SO2
+    '39524ca8-e1e3-4e9f-8b77-6682064bd176', #O3
+    '8f73075e-80b8-4176-86f2-88c0c4af129c', #CO
+    'd40902f3-4948-48b0-a847-675d40222a55' #BC
 ]
 API_KEY = os.environ['RW_API_KEY']
 INTERSECTS_SQL = "st_intersects(the_geom,st_buffer(ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Point\",\"coordinates\":{{point}}}'),4326),1))"
